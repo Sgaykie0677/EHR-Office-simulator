@@ -33,7 +33,7 @@
             border-radius: 12px;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             width: 100%;
-            max-width: 900px;
+            max-width: 1200px;
             padding: 2rem;
             display: flex;
             flex-direction: row;
@@ -84,101 +84,72 @@
             padding: 1.5rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        /* Styling for the quiz section */
-        .question-box {
+        .claim-form-container {
             background-color: #f9fafb;
             border-radius: 8px;
             padding: 2rem;
-            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        .question-text {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
-        .answer-btn {
-            display: block;
-            width: 100%;
-            padding: 0.75rem;
-            margin-bottom: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            background-color: white;
-            cursor: pointer;
-            transition: background-color 0.2s ease, border-color 0.2s ease;
-            text-align: left;
-        }
-        .answer-btn:hover {
-            background-color: #e5e7eb;
-        }
-        .answer-btn.correct {
-            background-color: #d1fae5;
-            border-color: #10b981;
-            font-weight: 600;
-            pointer-events: none;
-        }
-        .answer-btn.incorrect {
-            background-color: #fee2e2;
-            border-color: #ef4444;
-            font-weight: 600;
-            pointer-events: none;
-        }
-        .feedback {
-            font-size: 1rem;
-            font-weight: 500;
-            margin-top: 1rem;
-            min-height: 1.5rem;
-        }
-        .navigation-btns {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 1.5rem;
-        }
-        button {
-            background-color: #3b82f6;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        button:disabled {
-            background-color: #9ca3af;
-            cursor: not-allowed;
-        }
-        /* Claim Scrubbing Styles */
-        .claim-container {
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-        }
-        .claim-field {
+        .claim-form-section {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
             margin-bottom: 1rem;
         }
-        .claim-field label {
-            font-weight: 600;
-            color: #4a5568;
-            display: block;
-            margin-bottom: 0.5rem;
+        .claim-form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
         }
-        .claim-field input, .claim-field select {
+        .claim-form-field {
+            margin-bottom: 0.75rem;
+        }
+        .claim-form-field label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        .claim-form-field input, .claim-form-field select, .claim-form-field textarea {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #cbd5e0;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
             border-radius: 6px;
         }
-        .error-message {
-            color: #ef4444;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
+        .service-line {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) 0.5fr;
+            gap: 1rem;
+        }
+        .guide-box {
+            background-color: #f9fafb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
         }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 font-sans">
 
-    <div class="app-container">
+    <!-- Login Screen -->
+    <div id="login-screen" class="bg-white rounded-lg shadow-lg p-8 w-full max-w-sm text-center">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">EHR Simulator Login</h2>
+        <form id="login-form">
+            <div class="mb-4">
+                <label for="user-id" class="block text-left text-sm font-medium text-gray-700">User ID</label>
+                <input type="text" id="user-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" placeholder="user">
+            </div>
+            <div class="mb-6">
+                <label for="password" class="block text-left text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" placeholder="password">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                Login
+            </button>
+        </form>
+    </div>
+
+    <!-- Main Application Container (Initially Hidden) -->
+    <div id="main-app" class="app-container hidden">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <h1 class="text-xl font-bold text-gray-800 mb-4">EHR Simulator</h1>
@@ -211,6 +182,16 @@
                     </svg>
                     Scheduling
                 </button>
+                <button class="sidebar-btn" data-tab="claims">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Claim Forms
+                </button>
                 <button class="sidebar-btn" data-tab="coding">
                     <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="16 18 22 12 16 6"></polyline>
@@ -235,16 +216,6 @@
                     </svg>
                     Prior Auth
                 </button>
-                <button class="sidebar-btn" data-tab="claims">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
-                    Claim Forms
-                </button>
                 <button class="sidebar-btn" data-tab="quiz">
                     <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -254,6 +225,52 @@
                         <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>
                     Quiz
+                </button>
+                <button class="sidebar-btn" data-tab="assignments">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                        <path d="M12 3v18"></path>
+                        <path d="M16 17H8"></path>
+                        <path d="M16 13H8"></path>
+                    </svg>
+                    Assignments
+                </button>
+
+                <h3 class="text-sm font-bold text-gray-400 uppercase mt-4 mb-2">Resources</h3>
+                <button class="sidebar-btn" data-tab="coding-guide">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5"></path>
+                        <path d="M2 12l10 5 10-5"></path>
+                    </svg>
+                    Coding Guide
+                </button>
+                <button class="sidebar-btn" data-tab="hipaa-guide">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    HIPAA Guide
+                </button>
+                <button class="sidebar-btn" data-tab="cms-guide">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    CMS 1500 Guide
+                </button>
+                
+                <h3 class="text-sm font-bold text-gray-400 uppercase mt-4 mb-2">Help</h3>
+                <button class="sidebar-btn" data-tab="help-section">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    Help
                 </button>
             </nav>
         </aside>
@@ -305,6 +322,70 @@
                         <li>9:00 AM - John Smith (New Patient)</li>
                         <li>9:30 AM - Jane Doe (Follow-up)</li>
                     </ul>
+                </div>
+            </div>
+
+            <!-- Claim Forms Content -->
+            <div id="claims" class="tab-content">
+                <h2 class="text-2xl font-bold mb-4">Interactive Claim Form (CMS-1500)</h2>
+                <div class="claim-form-container">
+                    <form id="claims-form">
+                        <div class="claim-form-section">
+                            <h3 class="text-lg font-semibold mb-2">Patient Information</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="claim-form-field">
+                                    <label>Patient Name</label>
+                                    <input type="text" id="patient-name" placeholder="Jane Doe">
+                                </div>
+                                <div class="claim-form-field">
+                                    <label>Patient ID</label>
+                                    <input type="text" id="patient-id" placeholder="12345">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="claim-form-section">
+                            <h3 class="text-lg font-semibold mb-2">Diagnosis Codes (Box 21)</h3>
+                            <div class="claim-form-field">
+                                <label>DX 1 (Primary)</label>
+                                <input type="text" id="dx-1-code" placeholder="e.g., I10">
+                            </div>
+                            <div class="claim-form-field">
+                                <label>DX 2</label>
+                                <input type="text" id="dx-2-code" placeholder="e.g., E11.9">
+                            </div>
+                        </div>
+
+                        <div class="claim-form-section">
+                            <h3 class="text-lg font-semibold mb-2">Service Lines (Box 24)</h3>
+                            <div class="service-line font-bold text-gray-600 mb-2">
+                                <span>CPT/HCPCS</span>
+                                <span>Mod</span>
+                                <span>Charge</span>
+                                <span>DX Pointers</span>
+                            </div>
+                            <div class="service-line claim-form-field">
+                                <input type="text" class="cpt-code" placeholder="e.g., 99214">
+                                <input type="text" class="modifier-code" placeholder="e.g., 25">
+                                <input type="number" class="charge-amount" placeholder="e.g., 120.00">
+                                <input type="text" class="dx-pointer" placeholder="e.g., A">
+                            </div>
+                            <div class="service-line claim-form-field">
+                                <input type="text" class="cpt-code" placeholder="e.g., 71045">
+                                <input type="text" class="modifier-code" placeholder="">
+                                <input type="number" class="charge-amount" placeholder="e.g., 75.00">
+                                <input type="text" class="dx-pointer" placeholder="e.g., B">
+                            </div>
+                        </div>
+
+                        <div id="claim-feedback" class="mt-4 p-4 rounded-lg text-center font-medium hidden"></div>
+
+                        <div class="mt-6 flex justify-center">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                                Scrub Claim
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -371,22 +452,6 @@
                 </div>
             </div>
 
-            <!-- Claim Forms Content -->
-            <div id="claims" class="tab-content">
-                <h2 class="text-2xl font-bold mb-4">Claim Forms</h2>
-                <p class="text-gray-600">This section provides an overview of the two primary claim forms: UB-04 and CMS-1500.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div class="card">
-                        <h3 class="text-lg font-semibold text-gray-700">CMS-1500</h3>
-                        <p class="text-sm text-gray-600 mt-2">Used for billing outpatient services, such as those provided in a physician's office or clinic. This form is used for professional billing.</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="text-lg font-semibold text-gray-700">UB-04</h3>
-                        <p class="text-sm text-gray-600 mt-2">Used for billing institutional services, such as those provided by hospitals, skilled nursing facilities, or home health agencies. This form is used for institutional billing.</p>
-                    </div>
-                </div>
-            </div>
-
             <!-- Quiz Content -->
             <div id="quiz" class="tab-content text-center">
                 <h2 class="text-2xl font-bold mb-6">Medical Coding Quiz</h2>
@@ -409,12 +474,105 @@
                     <button class="mt-4" onclick="window.location.reload();">Retake Quiz</button>
                 </div>
             </div>
+            
+            <!-- Assignments Content -->
+            <div id="assignments" class="tab-content">
+                <h2 class="text-2xl font-bold mb-4">Assignments</h2>
+                <p class="text-gray-600 mb-4">Manage your tasks and to-do items for the day.</p>
+                <div class="flex mb-4">
+                    <input type="text" id="new-assignment-input" class="flex-grow p-2 border rounded-l-md" placeholder="Enter a new assignment...">
+                    <button id="add-assignment-btn" class="bg-indigo-600 text-white p-2 rounded-r-md">Add Task</button>
+                </div>
+                <ul id="assignments-list" class="bg-gray-100 p-4 rounded-lg">
+                    <!-- Assignments will be dynamically added here -->
+                </ul>
+            </div>
+
+            <!-- Coding Guide Content -->
+            <div id="coding-guide" class="tab-content">
+                <h2 class="text-2xl font-bold mb-4">Coding Guide</h2>
+                <p class="text-gray-600 mb-4">Quick reference for common ICD-10, CPT, and HCPCS codes and their descriptions. This is a condensed version to give you a feel for how a guide works.</p>
+                
+                <h3 class="text-xl font-semibold mt-6 mb-2">ICD-10 (Diagnosis Codes)</h3>
+                <div class="guide-box">
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>**I10**: Essential (primary) hypertension</li>
+                        <li>**E11.9**: Type 2 diabetes mellitus without complications</li>
+                        <li>**J02.9**: Acute pharyngitis, unspecified</li>
+                        <li>**R07.9**: Chest pain, unspecified</li>
+                    </ul>
+                </div>
+
+                <h3 class="text-xl font-semibold mt-6 mb-2">CPT (Procedure Codes)</h3>
+                <div class="guide-box">
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>**99214**: Established patient office visit, moderate complexity</li>
+                        <li>**71045**: Radiologic examination, chest; single view, frontal</li>
+                        <li>**45378**: Colonoscopy, flexible, diagnostic</li>
+                        <li>**12002**: Simple repair of superficial wounds of scalp, neck, axillae, external genitalia, trunk and/or extremities</li>
+                    </ul>
+                </div>
+
+                <h3 class="text-xl font-semibold mt-6 mb-2">HCPCS (DME & Services)</h3>
+                <div class="guide-box">
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>**G8411**: Influenza virus vaccine, pediatric</li>
+                        <li>**J3420**: Vitamin B-12 injection</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- HIPAA Guide Content -->
+            <div id="hipaa-guide" class="tab-content">
+                <h2 class="text-2xl font-bold mb-4">HIPAA Guide</h2>
+                <div class="guide-box">
+                    <p class="text-gray-700">HIPAA, or the Health Insurance Portability and Accountability Act, is a U.S. law that protects patient health information. It establishes standards for the security and privacy of this data. Key components include:</p>
+                    <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li>**Privacy Rule:** Governs the use and disclosure of Protected Health Information (PHI).</li>
+                        <li>**Security Rule:** Sets standards for securing PHI in electronic format.</li>
+                        <li>**Breach Notification Rule:** Requires covered entities to notify affected individuals of a breach.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- CMS 1500 Guide Content -->
+            <div id="cms-guide" class="tab-content">
+                <h2 class="text-2xl font-bold mb-4">CMS 1500 Guide</h2>
+                <div class="guide-box">
+                    <p class="text-gray-700">The CMS-1500 is the standard paper claim form used by non-institutional providers to bill for professional services. It is used to submit claims to Medicare, Medicaid, and private insurance companies. It contains critical information such as:</p>
+                    <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li>Patient and Insured Information</li>
+                        <li>Diagnosis and Procedure Codes</li>
+                        <li>Service Date and Charge Information</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Help Content -->
+            <div id="help-section" class="tab-content">
+                <h2 class="text-2xl font-bold mb-4">Help</h2>
+                <div class="guide-box">
+                    <p class="text-gray-700">Welcome to the help section. This simulator is a tool for practicing medical office tasks. If you have any questions, you can review the guides or try the quiz to test your knowledge.</p>
+                </div>
+            </div>
 
         </main>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- Login Screen Logic ---
+            const loginScreen = document.getElementById('login-screen');
+            const mainApp = document.getElementById('main-app');
+            const loginForm = document.getElementById('login-form');
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // A simple simulated login. Any input is "valid".
+                loginScreen.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+            });
+
             // --- Tab Switching Logic ---
             const sidebarButtons = document.querySelectorAll('.sidebar-btn');
             const tabContents = document.querySelectorAll('.tab-content');
@@ -539,9 +697,34 @@
                 });
             }
 
+            // --- Claims Form Scrubbing Logic ---
+            const claimsForm = document.getElementById('claims-form');
+            const claimFeedback = document.getElementById('claim-feedback');
+
+            claimsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const dx1 = document.getElementById('dx-1-code').value.trim();
+                const cpt1 = document.querySelector('.cpt-code').value.trim();
+                const charge1 = document.querySelector('.charge-amount').value.trim();
+
+                claimFeedback.classList.remove('hidden', 'bg-red-200', 'bg-green-200');
+                claimFeedback.textContent = '';
+
+                if (dx1 === '' || cpt1 === '' || charge1 === '') {
+                    claimFeedback.textContent = "Error: Claim has missing information. Please fill in a primary diagnosis code, CPT code, and a charge amount.";
+                    claimFeedback.classList.add('bg-red-200', 'text-red-800');
+                } else if (parseFloat(charge1) <= 0) {
+                    claimFeedback.textContent = "Error: Charge amount must be greater than zero.";
+                    claimFeedback.classList.add('bg-red-200', 'text-red-800');
+                } else {
+                    claimFeedback.textContent = "Claim scrubbed successfully! No errors found.";
+                    claimFeedback.classList.add('bg-green-200', 'text-green-800');
+                }
+            });
+
             // --- Quiz Logic ---
             const quizData = [
-                // Medical Coding Quiz
                 {
                     question: "A patient presents with a laceration on their left arm that requires simple repair. The physician closes the wound with sutures, and the total length of the repair is 4.5 cm. What is the correct CPT code for this procedure?",
                     answers: ["12032", "12002", "12034", "12001"],
@@ -602,7 +785,6 @@
                     correct: "77067",
                     rationale: "This is the correct code for a screening mammogram, bilateral."
                 },
-                // Medical Office & EHR Quiz
                 {
                     question: "During patient registration, which of the following is the most critical piece of information to verify for accurate billing?",
                     answers: ["The patient's preferred contact method.", "The patient's insurance policy number and effective date.", "The patient's emergency contact information.", "The patient's date of birth and social security number."],
@@ -681,7 +863,7 @@
                     allAnswers.forEach(answer => {
                         const button = document.createElement('button');
                         button.textContent = answer;
-                        button.classList.add('answer-btn');
+                        button.classList.add('answer-btn', 'block', 'w-full', 'p-3', 'mb-2', 'border', 'border-gray-300', 'rounded-lg', 'bg-white', 'hover:bg-gray-100', 'text-left', 'transition-colors');
                         button.addEventListener('click', () => selectAnswer(answer, currentQuestion.correct, button));
                         answersContainer.appendChild(button);
                     });
@@ -692,7 +874,7 @@
                         answersContainer.querySelectorAll('.answer-btn').forEach(btn => {
                             btn.disabled = true;
                             if (btn.textContent === currentQuestion.correct) {
-                                btn.classList.add('correct');
+                                btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
                             }
                         });
                         
@@ -701,9 +883,9 @@
                             feedbackMessage.style.color = "#10b981";
                         } else {
                             if (selectedAnswerButton) {
-                                selectedAnswerButton.classList.add('incorrect');
+                                selectedAnswerButton.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
                             }
-                            feedbackMessage.textContent = "Incorrect. The correct answer is highlighted.";
+                            feedbackMessage.textContent = "Incorrect. The correct answer is highlighted in green.";
                             feedbackMessage.style.color = "#ef4444";
                         }
                     }
@@ -722,7 +904,7 @@
                 answersContainer.querySelectorAll('.answer-btn').forEach(btn => {
                     btn.disabled = true;
                     if (btn.textContent === correctAnswer) {
-                        btn.classList.add('correct');
+                        btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
                     }
                 });
 
@@ -731,8 +913,8 @@
                     feedbackMessage.textContent = "Correct!";
                     feedbackMessage.style.color = "#10b981";
                 } else {
-                    button.classList.add('incorrect');
-                    feedbackMessage.textContent = "Incorrect. The correct answer is highlighted.";
+                    button.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                    feedbackMessage.textContent = "Incorrect. The correct answer is highlighted in green.";
                     feedbackMessage.style.color = "#ef4444";
                 }
 
@@ -765,9 +947,37 @@
             nextBtn.addEventListener('click', nextQuestion);
             prevBtn.addEventListener('click', prevQuestion);
             
-            // Initialize the app by showing the first tab and loading the first quiz question
-            showTab('dashboard');
             loadQuestion();
+
+            // --- Assignments Logic ---
+            const assignmentInput = document.getElementById('new-assignment-input');
+            const addAssignmentBtn = document.getElementById('add-assignment-btn');
+            const assignmentsList = document.getElementById('assignments-list');
+
+            addAssignmentBtn.addEventListener('click', () => {
+                const taskText = assignmentInput.value.trim();
+                if (taskText !== "") {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('flex', 'justify-between', 'items-center', 'p-2', 'bg-white', 'rounded-md', 'shadow-sm', 'mb-2');
+                    listItem.innerHTML = `
+                        <span class="text-gray-800">${taskText}</span>
+                        <button class="remove-task-btn text-red-500 hover:text-red-700 font-bold px-2 rounded-full">&times;</button>
+                    `;
+                    assignmentsList.appendChild(listItem);
+                    assignmentInput.value = "";
+
+                    const removeButton = listItem.querySelector('.remove-task-btn');
+                    removeButton.addEventListener('click', () => {
+                        listItem.remove();
+                    });
+                }
+            });
+
+            assignmentInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    addAssignmentBtn.click();
+                }
+            });
         });
     </script>
 </body>
