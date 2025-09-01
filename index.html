@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHR Medical Office Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2rem;
+            color: #374151;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            display: flex;
+            gap: 2rem;
+        }
+        .sidebar {
+            width: 250px;
+            flex-shrink: 0;
+            background-color: #f9fafb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+        }
+        .sidebar button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: #4b5563;
+            transition: all 0.2s;
+            text-align: left;
+            margin-bottom: 0.5rem;
+        }
+        .sidebar button:hover {
+            background-color: #e5e7eb;
+            color: #1f2937;
+        }
+        .sidebar button.active {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .sidebar svg {
+            margin-right: 0.75rem;
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+        .main-content {
+            flex-grow: 1;
+        }
+        .module-content {
+            display: none;
+        }
+        .module-content.active {
+            display: block;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background-color: #10b981;
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background-color: #059669;
+        }
+        .message-box {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background-color: #fff;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 100;
+            display: none;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease-in-out;
+        }
+        .message-box.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .quiz-option {
+            padding: 1rem;
+            background-color: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quiz-option:hover {
+            background-color: #e5e7eb;
+        }
+        .quiz-option.correct {
+            background-color: #d1fae5;
+            border-color: #34d399;
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+        }
+        .claim-form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .claim-form-section {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+        }
+        .claim-form-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            border: 1px solid #d1d5db;
+        }
+        .claim-form-table th, .claim-form-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+        .claim-form-table th {
+            font-weight: 600;
+            background-color: #f3f4f6;
+        }
+        .claim-form-table tr:last-child td {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="message-box" id="messageBox">
+    <div class="flex items-center space-x-2">
+        <svg id="messageIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <!-- Icon will be set by JS -->
+        </svg>
+        <span id="messageText" class="text-sm font-medium text-gray-800"></span>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Sidebar / Navigation -->
+    <div class="sidebar">
+        <h2 class="text-xl font-bold mb-6 text-center text-gray-800">EHR Simulator</h2>
+        <nav class="space-y-2">
+            <button onclick="showModule('dashboard', this)" class="active">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Dashboard
+            </button>
+            <button onclick="showModule('patient-chart', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                </svg>
+                Patient Chart
+            </button>
+            <button onclick="showModule('patient-registration', this)">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.5H10.5m-5.25 10.5H6m4.5-5.25H12m-2.25-4.5H10.5m-5.25 10.5H6m4.5-5.25H12M12 21a9 9 0 110-18 9 9 0 010 18z" />
+                </svg>
+                Patient Registration
+            </button>
+            <button onclick="showModule('scheduling', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h.01M16 11h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Scheduling
+            </button>
+            <button onclick="showModule('coding', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4m-4 4l-4 4"></path>
+                </svg>
+                Coding
+            </button>
+            <button onclick="showModule('billing-payments', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.032 60.032 0 0115.794-4.225A18.853 18.853 0 0118 19.5a18.853 18.853 0 01-10.744 5.378c-.752.126-1.558.264-2.43.375C3.375 25.5 1.5 24 1.5 22.5V18.75zM12 2.25c-5.16 0-9.375 4.14-9.375 9.255v1.275a2.25 2.25 0 002.25 2.25h14.25a2.25 2.25 0 002.25-2.25V11.505c0-5.115-4.215-9.255-9.375-9.255z" />
+                </svg>
+                Billing & Payments
+            </button>
+            <button onclick="showModule('prior-authorization', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75M12 3v12m-3-6h6m-1.5 9h.008v.008H12m-.008 3h.008v.008H12M12 21a9 9 0 110-18 9 9 0 010 18z" />
+                </svg>
+                Prior Auth
+            </button>
+            <button onclick="showModule('claim-forms', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.25m0 0-2.25 2.25M19.5 12V6.75A2.25 2.25 0 0017.25 4.5H5.25A2.25 2.25 0 003 6.75v10.5A2.25 2.25 0 005.25 19.5h10.5A2.25 2.25 0 0018 17.25V9M16.5 7.5h.008v.008h-.008z" />
+                </svg>
+                Claim Forms
+            </button>
+            <button onclick="showModule('assignments', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                </svg>
+                Assignments
+            </button>
+            <button onclick="showModule('compliance', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Compliance
+            </button>
+            <button onclick="showModule('quiz', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0v4m-5 9H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v11a2 2 0 01-2 2z"></path>
+                </svg>
+                Quiz
+            </button>
+        </nav>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Dashboard Module -->
+        <div id="dashboard" class="module-content active">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Dashboard</h1>
+            <p class="text-gray-600 mb-6">Welcome to your EHR Medical Office Simulator. Select a module from the sidebar to begin practicing a specific task.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dashboard Cards -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 shadow-sm">
+                    <h3 class="font-semibold text-lg text-blue-800 mb-2">Pending Tasks</h3>
+                    <p class="text-blue-600 text-3xl font-bold" id="pendingTasksCount">0</p>
+                    <p class="text-blue-500 text-sm">New assignments and follow-ups</p>
+                </div>
+                <div class="bg-green-50 border border-green-200 rounded-lg p-6 shadow-sm">
+                    <h3 class="font-semibold text-lg text-green-800 mb-2">Today's Appointments</h3>
+                    <p class="text-green-600 text-3xl font-bold">2</p>
+                    <p class="text-green-500 text-sm">Patients scheduled for today</p>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 shadow-sm">
+                    <h3 class="font-semibold text-lg text-yellow-800 mb-2">Unscrubbed Claims</h3>
+                    <p class="text-yellow-600 text-3xl font-bold" id="unscrubbedClaimsCount">0</p>
+                    <p class="text-yellow-500 text-sm">Claims to review for errors</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Chart Module -->
+        <div id="patient-chart" class="module-content">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Patient Chart</h1>
+            <p class="text-gray-600 mb-4">Search for a patient to view their complete medical record.</p>
+            <div class="flex space-x-2 mb-6">
+                <input type="text" id="patientName" placeholder="Search by name (e.g., John Smith or Jane Doe)" class="flex-grow">
+                <button id="searchPatientBtn" class="btn btn-primary">Search</button>
+            </div>
+            
+            <div id="patientProfile" class="hidden">
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 mb-6">
+                    <h2 class="text-2xl font-semibold mb-4" id="patientProfileName"></h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p><span class="font-semibold text-gray-700">DOB:</span> <span id="patientProfileDob" class="text-gray-600"></span></p>
+                            <p><span class="font-semibold text-gray-700">Insurance:</span> <span id="patientProfileInsurance" class="text-gray-600"></span></p>
+                            <p><span class="font-semibold text-gray-700">Allergies:</span> <span id="patientProfileAllergies" class="text-gray-600"></span></p>
+                        </div>
+                        <div>
+                            <p><span class="font-semibold text-gray-700">Last Visit:</span> <span id="patientProfileLastVisit" class="text-gray-600"></span></p>
+                            <p><span class="font-semibold text-gray-700">Chief Complaint:</span> <span id="patientProfileComplaint" class="text-gray-600"></span></p>
+                            <p><span class="font-semibold text-gray-700">Vitals:</span> <span id="patientProfileVitals" class="text-gray-600"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clinical Documentation & Notes -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 mb-6">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Clinical Notes</h3>
+                    <div class="space-y-4">
+                        <textarea id="clinicalNotes" rows="8" placeholder="Document the patient encounter here... (This data is not saved)" class="bg-white"></textarea>
+                    </div>
+                </div>
+
+                <!-- Lab Results Module -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Lab Results</h3>
+                    <div id="lab-results-container" class="overflow-x-auto">
+                        <table class="w-full text-left table-auto border-collapse">
+                            <thead>
+                                <tr>
+                                    <th class="p-4 bg-gray-200 border border-gray-300 rounded-tl-lg">Test</th>
+                                    <th class="p-4 bg-gray-200 border border-gray-300">Result</th>
+                                    <th class="p-4 bg-gray-200 border border-gray-300">Unit</th>
+                                    <th class="p-4 bg-gray-200 border border-gray-300">Reference Range</th>
+                                    <th class="p-4 bg-gray-200 border border-gray-300 rounded-tr-lg">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lab-results-body">
+                            </tbody>
+                        </table>
+                    </div>
+                    <p id="no-lab-results" class="text-gray-500 text-center py-4 hidden">No lab results on file.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Registration Module -->
+        <div id="patient-registration" class="module-content">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Patient Registration</h1>
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Register New Patient</h2>
+                <div class="space-y-4">
+                    <div class="input-group">
+                        <label for="regPatientName">Full Name</label>
+                        <input type="text" id="regPatientName" placeholder="e.g., Alice Johnson">
+                    </div>
+                    <div class="input-group">
+                        <label for="regDob">Date of Birth</label>
+                        <input type="date" id="regDob">
+                    </div>
+                    <div class="input-group">
+                        <label for="regInsurance">Insurance Provider</label>
+                        <input type="text" id="regInsurance" placeholder="e.g., Aetna, Cigna">
+                    </div>
+                    <div class="input-group">
+                        <label for="regAllergies">Known Allergies</label>
+                        <textarea id="regAllergies" rows="3" placeholder="e.g., Peanuts, Sulfa drugs"></textarea>
+                    </div>
+                    <button id="registerPatientBtn" class="btn btn-primary w-full">Register Patient</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheduling Module -->
+        <div id="scheduling" class="module-content">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Scheduling</h1>
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Today's Appointments</h2>
+                <ul id="appointment-list" class="space-y-4">
+                    <li class="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+                        <p class="font-semibold text-lg text-gray-800">10:00 AM - John Smith</p>
+                        <p class="text-sm text-gray-500">Reason: Annual Physical</p>
+                    </li>
+                    <li class="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+                        <p class="font-semibold text-lg text-gray-800">10:45 AM - Jane Doe</p>
+                        <p class="text-sm text-gray-500">Reason: Follow-up for seasonal allergies</p>
+                    </li>
+                </ul>
+                <div class="mt-6">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Schedule a New Appointment</h3>
+                    <div class="space-y-4">
+                        <div class="input-group">
+                            <label for="schedPatientName">Patient Name</label>
+                            <input type="text" id="schedPatientName" placeholder="e.g., Alice Johnson">
+                        </div>
+                        <div class="input-group">
+                            <label for="schedApptType">Appointment Type</label>
+                            <input type="text" id="schedApptType" placeholder="e.g., Check-up, Consultation">
+                        </div>
+                        <button id="scheduleBtn" class="btn btn-primary w-full">Schedule Appointment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coding Module (Claim Scrubbing) -->
+        <div id="coding" class="module-content">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Coding & Claims</h1>
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Scrub Claims for Errors</h2>
+                <p class="text-gray-600 mb-6">Practice identifying and fixing common coding errors. Click "Load New Claim" to begin.</p>
+                <button id="loadClaimBtn" class="btn btn-primary mb-6">Load New Claim</button>
+
+                <div id="claimContainer" class="hidden">
+                    <h3 class="text-xl font-semibold mb-2">Claim to Review</h3>
+                    <p class="text-red-500 font-medium mb-4" id="problemDescription"></p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="input-group">
+                            <label for="cptCode">CPT Code</label>
+                            <input type="text" id="cptCode" readonly class="bg-gray-200 cursor-not-allowed">
+                        </div>
+                        <div class="input-group">
+                            <label for="diagnosisCode">Diagnosis Code</label>
+                            <input type="text" id="diagnosisCode" readonly class="bg-gray-200 cursor-not-allowed">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="input-group">
+                            <label for="correctedCode">Corrected Diagnosis/CPT Code</label>
+                            <input type="text" id="correctedCode" placeholder="Enter corrected code here">
+                        </div>
+                        <div class="input-group">
+                            <label for="correctedMod">Corrected Modifier</label>
+                            <input type="text" id="correctedMod" placeholder="Enter corrected modifier (if any)">
+                        </div>
+                    </div>
+                    <button id="scrubClaimBtn" class="btn btn-primary w-full">Scrub Claim</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prior Authorization Module -->
+        <div id="prior-authorization" class="module-content">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Prior Authorization</h1>
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Request New Authorization</h2>
+                <div class="space-y-4">
+                    <div class="input-group">
+                        <label for="authPatientName">Patient Name</label>
+                        <input type="text" id="authPatientName" placeholder="e.g., John Smith">
+                    </div>
+                    <div class="input-group">
+                        <label for="authService">Service/Procedure</label>
+                        <input type="text" id="authService" placeholder="e.g., MRI of the shoulder">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label for="authCpt">CPT Code</label>
+                            <input type="text" id="authCpt" placeholder="e.g., 73223">
+                        </div>
+                        <div class="input-group">
+                            <label for="authDx">Diagnosis Code</label>
+                            <input type="text" id="authDx" placeholder="e.g., S43.401A">
+                        </div>
+                    </div>
+                    <button id="submitAuthBtn" class="btn btn-primary w-full">Submit for Authorization</button>
+                </div>
+                <div id="authStatus" class="mt-6 p-4 rounded-lg text-center font-medium hidden"></div>
+            </div>
+        </div>
+
+        <!-- Claim Forms Module -->
+        <div id="claim-forms" class="module-content">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Claim Forms</h1>
+            <p class="text-gray-600 mb-6">Learn the difference between the two most common medical claim forms.</p>
+            <div class="claim-form-container">
+                <div class="claim-form-section">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">UB-04 Claim Form (CMS-1450)</h2>
+                    <p class="text-gray-600">The **UB-04 (Uniform Bill) claim form** is the standard paper form used by **institutional providers** to bill insurance carriers for services. </p> 
+                    <p class="text-gray-600 mt-2">This form is used for billing services provided by facilities, which can include hospitals, ambulatory surgical centers, skilled nursing facilities, and rehabilitation centers.</p>
+                </div>
+                <div class="claim-form-section">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">CMS-1500 Claim Form</h2>
+                    <p class="text-gray-600">The **CMS-1500 claim form** is the standard paper form used by **non-institutional providers** to bill for professional medical services. </p> 
+                    <p class="text-gray-600 mt-2">This form is used for billing services provided in an office or clinic setting by individual practitioners and suppliers, such as physicians, chiropractors, and therapists.</p>
+                </div>
+                <div class="claim-form-section">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Key Differences at a Glance</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left claim-form-table">
+                            <thead>
+                                <tr>
+                                    <th class="py-2 px-4">Feature</th>
+                                    <th class="py-2 px-4">UB-04 Claim Form</th>
+                                    <th class="py-2 px-4">CMS-1500 Claim Form</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="py-2 px-4">Used by</td>
+                                    <td class="py-2 px-4">Institutional providers (hospitals, clinics)</td>
+                                    <td class="py-2 px-4">Non-institutional providers (physicians, therapists)</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-4">Used for</td>
+                                    <td class="py-2 px-4">Facility services and hospital charges</td>
+                                    <td class="py-2 px-4">Professional services by individuals</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-4">Key Codes</td>
+                                    <td class="py-2 px-4">Revenue codes</td>
+                                    <td class="py-2 px-4">CPT and HCPCS codes</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Billing & Payments Module -->
+        <div id="billing-payments" class="module-content">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Billing & Payments</h1>
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Charge Entry</h2>
+                <div class="space-y-4 mb-6">
+                    <div class="input-group">
+                        <label for="chargePatientName">Patient Name</label>
+                        <input type="text" id="chargePatientName" placeholder="e.g., John Smith">
+                    </div>
+                    <div class="input-group">
+                        <label for="chargeCpt">CPT Code</label>
+                        <input type="text" id="chargeCpt" placeholder="e.g., 99213">
+                    </div>
+                    <div class="input-group">
+                        <label for="chargeAmount">Amount</label>
+                        <input type="number" id="chargeAmount" placeholder="e.g., 150.00">
+                    </div>
+                    <button id="enterChargeBtn" class="btn btn-primary w-full">Enter Charge</button>
+                </div>
+
+                <hr class="my-6 border-gray-300" />
+
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Patient Balance Calculator</h2>
+                <div class="space-y-4">
+                    <div class="input-group">
+                        <label for="totalCharges">Total Charges ($)</label>
+                        <input type="number" id="totalCharges" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="insurancePayments">Insurance Payments ($)</label>
+                        <input type="number" id="insurancePayments" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="patientPayments">Patient Payments ($)</label>
+                        <input type="number" id="patientPayments" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="adjustments">Adjustments ($)</label>
+                        <input type="number" id="adjustments" value="0">
+                    </div>
+                    <button id="calculateBalanceBtn" class="btn btn-primary w-full">Calculate Balance</button>
+                    <div id="balanceResult" class="p-4 rounded-lg mt-4 hidden">
+                        <p class="text-lg font-semibold text-gray-800">Patient Balance: $<span id="balanceAmount">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignments Module -->
+        <div id="assignments" class="module-content">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Task Assignments</h1>
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Create a New Task</h2>
+                <div class="space-y-4 mb-6">
+                    <div class="input-group">
+                        <label for="taskDescription">Task Description</label>
+                        <input type="text" id="taskDescription" placeholder="e.g., Follow up on lab results for Jane Doe">
+                    </div>
+                    <div class="input-group">
+                        <label for="assignTo">Assign To</label>
+                        <select id="assignTo" class="bg-white">
+                            <option value="Dr. Smith">Dr. Smith</option>
+                            <option value="Jane">Jane (Front Desk)</option>
+                            <option value="Alex">Alex (Nurse)</option>
+                        </select>
+                    </div>
+                    <button id="assignTaskBtn" class="btn btn-primary w-full">Assign Task</button>
+                </div>
+
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">My Pending Tasks</h2>
+                <div id="pending-tasks-list" class="space-y-4">
+                    <p class="text-gray-500 text-center">No tasks assigned yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Regulatory Compliance Module -->
+        <div id="compliance" class="module-content">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Regulatory Compliance</h1>
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">HIPAA & Privacy Quiz</h2>
+                <div id="compliance-quiz-container">
+                    <div id="compliance-question-box">
+                        <p id="compliance-question-number" class="text-sm font-medium text-gray-500 mb-1"></p>
+                        <p id="compliance-question-text" class="text-lg font-semibold mb-4 text-gray-800"></p>
+                        <div id="compliance-answer-options" class="space-y-4"></div>
+                        <div id="compliance-feedback-box" class="hidden">
+                            <div id="compliance-feedback-text" class="p-4 mt-4 rounded-lg"></div>
+                            <button id="compliance-next-btn" class="btn btn-primary w-full mt-4">Next Question</button>
+                        </div>
+                    </div>
+                    <div id="compliance-results" class="hidden text-center mt-6">
+                        <h3 class="text-xl font-bold mb-2">Quiz Complete!</h3>
+                        <p class="text-gray-700">You scored <span id="compliance-score" class="font-semibold text-green-600"></span> out of <span id="compliance-total" class="font-semibold"></span>.</p>
+                        <button id="compliance-restart-btn" class="btn btn-primary mt-4">Restart Quiz</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Module -->
+        <div id="quiz" class="module-content">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Coding Quiz</h1>
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Medical Coding Practice Quiz</h2>
+                <div id="quiz-container">
+                    <div id="question-box">
+                        <p id="question-number" class="text-sm font-medium text-gray-500 mb-1"></p>
+                        <p id="question-text" class="text-lg font-semibold mb-4 text-gray-800"></p>
+                        <div id="answer-options" class="space-y-4"></div>
+                        <div id="feedback-box" class="hidden">
+                            <div id="feedback-text" class="p-4 mt-4 rounded-lg"></div>
+                            <button id="next-question-btn" class="btn btn-primary w-full mt-4">Next Question</button>
+                        </div>
+                    </div>
+                    <div id="quiz-results" class="hidden text-center mt-6">
+                        <h3 class="text-xl font-bold mb-2">Quiz Complete!</h3>
+                        <p class="text-gray-700">You scored <span id="quiz-score" class="font-semibold text-green-600"></span> out of <span id="quiz-total" class="font-semibold"></span>.</p>
+                        <button id="restart-quiz-btn" class="btn btn-primary mt-4">Restart Quiz</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    // --- Global Utility Functions ---
+    function showMessage(message, type = 'success') {
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageIcon = document.getElementById('messageIcon');
+
+        messageText.textContent = message;
+
+        let iconSvg;
+        if (type === 'success') {
+            messageBox.style.backgroundColor = '#d1fae5';
+            messageText.style.color = '#065f46';
+            iconSvg = `<svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+        } else if (type === 'error') {
+            messageBox.style.backgroundColor = '#fee2e2';
+            messageText.style.color = '#991b1b';
+            iconSvg = `<svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+        } else {
+            messageBox.style.backgroundColor = '#e0f2fe';
+            messageText.style.color = '#075985';
+            iconSvg = `<svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+        }
+        
+        messageIcon.innerHTML = iconSvg;
+        messageBox.classList.add('show');
+        
+        setTimeout(() => {
+            messageBox.classList.remove('show');
+        }, 5000);
+    }
+
+    // --- Tab Switching Logic ---
+    function showModule(moduleId, clickedButton) {
+        // Remove active class from all content modules
+        document.querySelectorAll('.module-content').forEach(module => {
+            module.classList.remove('active');
+        });
+        // Remove active class from all sidebar buttons
+        document.querySelectorAll('.sidebar button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Add active class to the selected content module
+        const activeModule = document.getElementById(moduleId);
+        if (activeModule) {
+            activeModule.classList.add('active');
+        }
+
+        // Add active class to the selected button
+        if (clickedButton) {
+            clickedButton.classList.add('active');
+        }
+
+        // Special handling for modules with their own initialization logic
+        if (moduleId === 'quiz') {
+            startQuiz('coding');
+        }
+        if (moduleId === 'compliance') {
+            startQuiz('compliance');
+        }
+    }
+
+    // --- Patient Data (Mock Database) ---
+    const patientData = {
+        "John Smith": {
+            dob: "05/15/1980",
+            insurance: "Blue Cross Blue Shield",
+            lastVisit: "10/26/2023",
+            allergies: "Penicillin",
+            chiefComplaint: "Routine physical exam",
+            vitals: "BP: 120/80, HR: 72, Temp: 98.6°F",
+            labResults: [
+                { test: "Complete Blood Count (CBC)", result: "Normal", unit: "", reference: "Normal Range", date: "10/26/2023" },
+                { test: "Fasting Glucose", result: "95", unit: "mg/dL", reference: "70-99", date: "10/26/2023" }
+            ]
+        },
+        "Jane Doe": {
+            dob: "09/22/1992",
+            insurance: "United Healthcare",
+            lastVisit: "09/10/2023",
+            allergies: "None",
+            chiefComplaint: "Follow-up for seasonal allergies",
+            vitals: "BP: 110/70, HR: 68, Temp: 98.2°F",
+            labResults: [
+                { test: "Allergy Panel", result: "Positive", unit: "", reference: "Negative", date: "09/10/2023" },
+                { test: "IgE", result: "250", unit: "IU/mL", reference: "0-100", date: "09/10/2023" }
+            ]
+        }
+    };
+
+    // --- Patient Chart Module ---
+    document.getElementById('searchPatientBtn').addEventListener('click', () => {
+        const patientName = document.getElementById('patientName').value.trim();
+        const patientProfile = document.getElementById('patientProfile');
+        
+        if (patientData[patientName]) {
+            const data = patientData[patientName];
+            document.getElementById('patientProfileName').textContent = patientName;
+            document.getElementById('patientProfileDob').textContent = data.dob;
+            document.getElementById('patientProfileInsurance').textContent = data.insurance;
+            document.getElementById('patientProfileLastVisit').textContent = data.lastVisit;
+            document.getElementById('patientProfileAllergies').textContent = data.allergies;
+            document.getElementById('patientProfileComplaint').textContent = data.chiefComplaint;
+            document.getElementById('patientProfileVitals').textContent = data.vitals;
+
+            const labResultsBody = document.getElementById('lab-results-body');
+            labResultsBody.innerHTML = '';
+            if (data.labResults && data.labResults.length > 0) {
+                data.labResults.forEach(result => {
+                    const row = labResultsBody.insertRow();
+                    row.insertCell(0).textContent = result.test;
+                    row.insertCell(1).textContent = result.result;
+                    row.insertCell(2).textContent = result.unit;
+                    row.insertCell(3).textContent = result.reference;
+                    row.insertCell(4).textContent = result.date;
+                });
+                document.getElementById('lab-results-container').classList.remove('hidden');
+                document.getElementById('no-lab-results').classList.add('hidden');
+            } else {
+                document.getElementById('lab-results-container').classList.add('hidden');
+                document.getElementById('no-lab-results').classList.remove('hidden');
+            }
+
+            patientProfile.classList.remove('hidden');
+            showMessage("Patient found.", 'success');
+        } else {
+            patientProfile.classList.add('hidden');
+            showMessage("Patient not found. Try 'John Smith' or 'Jane Doe'.", 'error');
+        }
+    });
+
+    // --- Patient Registration Module ---
+    document.getElementById('registerPatientBtn').addEventListener('click', () => {
+        const name = document.getElementById('regPatientName').value.trim();
+        const dob = document.getElementById('regDob').value;
+        const insurance = document.getElementById('regInsurance').value.trim();
+        const allergies = document.getElementById('regAllergies').value.trim();
+        
+        if (name && dob && insurance) {
+            patientData[name] = {
+                dob: dob,
+                insurance: insurance,
+                allergies: allergies || "None",
+                lastVisit: "N/A",
+                chiefComplaint: "N/A",
+                vitals: "N/A",
+                labResults: []
+            };
+            document.getElementById('regPatientName').value = '';
+            document.getElementById('regDob').value = '';
+            document.getElementById('regInsurance').value = '';
+            document.getElementById('regAllergies').value = '';
+            showMessage("Patient registered successfully!", 'success');
+        } else {
+            showMessage("Please fill out all required fields (Name, DOB, Insurance).", 'error');
+        }
+    });
+
+    // --- Scheduling Module ---
+    document.getElementById('scheduleBtn').addEventListener('click', () => {
+        const patientName = document.getElementById('schedPatientName').value.trim();
+        const apptType = document.getElementById('schedApptType').value.trim();
+        
+        if (patientName && apptType) {
+            const today = new Date();
+            const apptDate = new Date(today.setDate(today.getDate())); // Use current date for simplicity
+            const formattedDate = apptDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+            
+            const newApptLi = document.createElement('li');
+            newApptLi.className = 'p-4 bg-white rounded-lg shadow-sm border border-gray-200';
+            newApptLi.innerHTML = `<p class="font-semibold text-lg text-gray-800">10:45 AM - ${patientName}</p><p class="text-sm text-gray-500">Reason: ${apptType}</p>`;
+            document.getElementById('appointment-list').appendChild(newApptLi);
+            
+            showMessage("Appointment scheduled successfully!", 'success');
+        } else {
+            showMessage("Please enter both patient name and appointment type.", 'error');
+        }
+    });
+    
+    // --- Coding Module (Claim Scrubbing) ---
+    let currentClaim = null;
+    const claimScenarios = [
+        {
+            cpt: "99203",
+            problem: "Diagnosis code Z71.1 is not specific enough for a new patient visit. Use a more specific code like F17.200 for nicotine dependence.",
+            incorrectDx: "Z71.1",
+            correctDx: "F17.200",
+            incorrectMod: ""
+        },
+        {
+            cpt: "12032",
+            problem: "An office visit (99213) was billed with a laceration repair (12032) on the same day. A modifier is needed.",
+            incorrectDx: "S61.112A",
+            correctDx: "S61.112A",
+            incorrectMod: "",
+            correctMod: "25"
+        },
+        {
+            cpt: "99214",
+            problem: "The patient's diagnosis is a sprain, but the CPT code billed is for an established patient visit of high complexity. A modifier for an unrelated procedure is not present. Hint: A separate, significant, and unrelated E/M service.",
+            incorrectDx: "S93.402A",
+            correctDx: "S93.402A",
+            incorrectMod: ""
+        },
+        {
+            cpt: "99204",
+            problem: "Diagnosis code is for a specific fracture (S52.501A), but CPT code is for a general physical exam. Change CPT to a code for fracture care, e.g., '25505'.",
+            incorrectDx: "S52.501A",
+            correctDx: "S52.501A",
+            incorrectMod: ""
+        }
+    ];
+
+    document.getElementById('loadClaimBtn').addEventListener('click', () => {
+        const randomIndex = Math.floor(Math.random() * claimScenarios.length);
+        currentClaim = claimScenarios[randomIndex];
+
+        document.getElementById('claimContainer').classList.remove('hidden');
+        document.getElementById('correctedCode').value = "";
+        document.getElementById('correctedMod').value = "";
+
+        document.getElementById('problemDescription').textContent = "Problem: " + currentClaim.problem;
+        document.getElementById('cptCode').value = currentClaim.cpt;
+        document.getElementById('diagnosisCode').value = currentClaim.incorrectDx;
+        
+        document.getElementById('unscrubbedClaimsCount').textContent = parseInt(document.getElementById('unscrubbedClaimsCount').textContent) + 1;
+
+        showMessage("A new claim has been loaded. Your task is to correct the error.", 'info');
+    });
+
+    document.getElementById('scrubClaimBtn').addEventListener('click', () => {
+        if (!currentClaim) {
+            showMessage("Please load a new claim first.", 'error');
+            return;
+        }
+        const userCorrectedCode = document.getElementById('correctedCode').value.trim().toUpperCase();
+        const userCorrectedMod = document.getElementById('correctedMod').value.trim();
+        
+        let isCorrect = false;
+        if (currentClaim.correctMod) {
+            if (userCorrectedMod === currentClaim.correctMod && userCorrectedCode === currentClaim.correctDx) {
+                isCorrect = true;
+            }
+        } else {
+            if (userCorrectedCode === currentClaim.correctDx) {
+                isCorrect = true;
+            }
+        }
+
+        if (isCorrect) {
+            showMessage("Correct! The claim has been scrubbed successfully.", 'success');
+            document.getElementById('unscrubbedClaimsCount').textContent = parseInt(document.getElementById('unscrubbedClaimsCount').textContent) - 1;
+            document.getElementById('claimContainer').classList.add('hidden');
+            currentClaim = null;
+        } else {
+            showMessage("Incorrect. Please review the problem description and try again.", 'error');
+        }
+    });
+
+    // --- Prior Authorization Module ---
+    document.getElementById('submitAuthBtn').addEventListener('click', () => {
+        const patientName = document.getElementById('authPatientName').value.trim();
+        const service = document.getElementById('authService').value.trim();
+        const authStatusEl = document.getElementById('authStatus');
+
+        if (!patientName || !service) {
+            showMessage("Please fill out all fields.", 'error');
+            return;
+        }
+
+        authStatusEl.classList.remove('hidden');
+        authStatusEl.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+        authStatusEl.classList.add('bg-blue-100', 'text-blue-800');
+        authStatusEl.textContent = "Status: Pending Review...";
+
+        setTimeout(() => {
+            const isApproved = Math.random() > 0.3; // 70% chance of approval
+            if (isApproved) {
+                authStatusEl.classList.remove('bg-blue-100');
+                authStatusEl.classList.add('bg-green-100');
+                authStatusEl.textContent = "Status: Approved! Authorization number: A1B2C3D4E5";
+                showMessage("Prior authorization approved.", 'success');
+            } else {
+                authStatusEl.classList.remove('bg-blue-100');
+                authStatusEl.classList.add('bg-red-100');
+                authStatusEl.textContent = "Status: Denied. Medical necessity could not be established.";
+                showMessage("Prior authorization denied.", 'error');
+            }
+        }, 2000);
+    });
+
+    // --- Billing & Payments Module ---
+    document.getElementById('enterChargeBtn').addEventListener('click', () => {
+        const patientName = document.getElementById('chargePatientName').value.trim();
+        const cptCode = document.getElementById('chargeCpt').value.trim();
+        const amount = document.getElementById('chargeAmount').value.trim();
+        if (patientName && cptCode && amount) {
+            showMessage(`Charge for ${patientName} with CPT code ${cptCode} for $${amount} has been entered successfully.`, 'success');
+        } else {
+            showMessage("Please fill out all charge entry fields.", 'error');
+        }
+    });
+
+    document.getElementById('calculateBalanceBtn').addEventListener('click', () => {
+        const totalCharges = parseFloat(document.getElementById('totalCharges').value) || 0;
+        const insurancePayments = parseFloat(document.getElementById('insurancePayments').value) || 0;
+        const patientPayments = parseFloat(document.getElementById('patientPayments').value) || 0;
+        const adjustments = parseFloat(document.getElementById('adjustments').value) || 0;
+
+        const patientBalance = totalCharges - insurancePayments - patientPayments - adjustments;
+        document.getElementById('balanceAmount').textContent = patientBalance.toFixed(2);
+        document.getElementById('balanceResult').classList.remove('hidden');
+        showMessage(`Patient balance calculated.`, 'info');
+    });
+
+    // --- Assignments Module ---
+    let pendingTasks = [];
+    const pendingTasksCountEl = document.getElementById('pendingTasksCount');
+    const pendingTasksListEl = document.getElementById('pending-tasks-list');
+
+    document.getElementById('assignTaskBtn').addEventListener('click', () => {
+        const description = document.getElementById('taskDescription').value.trim();
+        const assignedTo = document.getElementById('assignTo').value;
+
+        if (description) {
+            const newTask = {
+                description: description,
+                assignedTo: assignedTo,
+                date: new Date().toLocaleDateString()
+            };
+            pendingTasks.push(newTask);
+            document.getElementById('taskDescription').value = '';
+            renderTasks();
+            showMessage(`Task assigned to ${assignedTo}.`, 'success');
+        } else {
+            showMessage("Please enter a task description.", 'error');
+        }
+    });
+
+    function renderTasks() {
+        pendingTasksCountEl.textContent = pendingTasks.length;
+        if (pendingTasks.length > 0) {
+            pendingTasksListEl.innerHTML = pendingTasks.map(task => `
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+                    <p class="font-semibold text-gray-800">${task.description}</p>
+                    <p class="text-sm text-gray-500">Assigned to: ${task.assignedTo}</p>
+                </div>
+            `).join('');
+        } else {
+            pendingTasksListEl.innerHTML = `<p class="text-gray-500 text-center">No tasks assigned yet.</p>`;
+        }
+    }
+
+    // --- Quiz Module (for both Coding and Compliance) ---
+    let quizState = {};
+
+    const quizData = {
+        "coding": {
+            "questions": [
+                { "question": "What CPT code is used for a simple laceration repair of a 4.5 cm wound on the arm?", "answerOptions": [{"text": "12002", "isCorrect": true, "rationale": "Correct. This code is for simple repair of a wound on the extremities from 2.6 to 7.5 cm."}, {"text": "12001", "isCorrect": false, "rationale": "Incorrect. This code is for a wound of 2.5 cm or less."}]},
+                { "question": "Which ICD-10 code represents essential (primary) hypertension?", "answerOptions": [{"text": "I10", "isCorrect": true, "rationale": "Correct. I10 is the code for essential (primary) hypertension without complications."}, {"text": "I11.9", "isCorrect": false, "rationale": "Incorrect. I11.9 is for hypertensive heart disease, not uncomplicated hypertension."}]},
+                { "question": "A patient with suspected diabetes needs a blood test. Which test should you order?", "answerOptions": [{"text": "Fasting Glucose", "isCorrect": true, "rationale": "Correct. A fasting glucose test is a common diagnostic tool for diabetes."}, {"text": "Complete Blood Count", "isCorrect": false, "rationale": "Incorrect. A CBC evaluates blood cells and is not specific for diabetes."}]}
+            ]
+        },
+        "compliance": {
+            "questions": [
+                { "question": "What does PHI stand for in HIPAA regulations?", "answerOptions": [{"text": "Protected Health Information", "isCorrect": true, "rationale": "Correct. PHI refers to any individually identifiable health information."}, {"text": "Patient Health Inventory", "isCorrect": false, "rationale": "Incorrect. The correct term is Protected Health Information."}]},
+                { "question": "Who is considered a Covered Entity under HIPAA?", "answerOptions": [{"text": "A healthcare provider, health plan, or healthcare clearinghouse.", "isCorrect": true, "rationale": "Correct. These three are the primary entities subject to HIPAA rules."}, {"text": "Only physicians and hospitals.", "isCorrect": false, "rationale": "Incorrect. It also includes health plans and clearinghouses."}]}
+            ]
+        }
+    };
+
+    function startQuiz(quizType) {
+        quizState = {
+            type: quizType,
+            currentQuestionIndex: 0,
+            score: 0
+        };
+
+        const quizContainer = document.getElementById(quizType === 'coding' ? 'quiz-container' : 'compliance-quiz-container');
+        const questionBox = document.getElementById(quizType === 'coding' ? 'question-box' : 'compliance-question-box');
+        const resultsBox = document.getElementById(quizType === 'coding' ? 'quiz-results' : 'compliance-results');
+
+        resultsBox.classList.add('hidden');
+        questionBox.classList.remove('hidden');
+        renderQuestion(quizType, 0);
+    }
+
+    function renderQuestion(quizType, index) {
+        if (index >= quizData[quizType].questions.length) {
+            showQuizResults(quizType);
+            return;
+        }
+
+        const question = quizData[quizType].questions[index];
+        const questionNumberEl = document.getElementById(quizType === 'coding' ? 'question-number' : 'compliance-question-number');
+        const questionTextEl = document.getElementById(quizType === 'coding' ? 'question-text' : 'compliance-question-text');
+        const optionsContainer = document.getElementById(quizType === 'coding' ? 'answer-options' : 'compliance-answer-options');
+        const feedbackBox = document.getElementById(quizType === 'coding' ? 'feedback-box' : 'compliance-feedback-box');
+        const nextBtn = document.getElementById(quizType === 'coding' ? 'next-question-btn' : 'compliance-next-btn');
+
+        questionNumberEl.textContent = `Question ${index + 1} of ${quizData[quizType].questions.length}`;
+        questionTextEl.textContent = question.question;
+        optionsContainer.innerHTML = '';
+        feedbackBox.classList.add('hidden');
+
+        question.answerOptions.forEach((option, i) => {
+            const optionBtn = document.createElement('div');
+            optionBtn.classList.add('quiz-option');
+            optionBtn.textContent = option.text;
+            optionBtn.addEventListener('click', () => handleAnswerClick(quizType, option, optionBtn, nextBtn));
+            optionsContainer.appendChild(optionBtn);
+        });
+    }
+
+    function handleAnswerClick(quizType, selectedOption, selectedBtn, nextBtn) {
+        const options = document.getElementById(quizType === 'coding' ? 'answer-options' : 'compliance-answer-options').querySelectorAll('.quiz-option');
+        options.forEach(btn => btn.style.pointerEvents = 'none'); // Disable all options
+
+        const feedbackTextEl = document.getElementById(quizType === 'coding' ? 'feedback-text' : 'compliance-feedback-text');
+        const feedbackBox = document.getElementById(quizType === 'coding' ? 'feedback-box' : 'compliance-feedback-box');
+        
+        if (selectedOption.isCorrect) {
+            selectedBtn.classList.add('correct');
+            feedbackTextEl.textContent = selectedOption.rationale;
+            feedbackBox.style.backgroundColor = '#d1fae5';
+            feedbackBox.style.color = '#065f46';
+            quizState.score++;
+        } else {
+            selectedBtn.classList.add('incorrect');
+            feedbackTextEl.textContent = selectedOption.rationale;
+            feedbackBox.style.backgroundColor = '#fee2e2';
+            feedbackBox.style.color = '#991b1b';
+        }
+
+        feedbackBox.classList.remove('hidden');
+        
+        nextBtn.onclick = () => {
+            quizState.currentQuestionIndex++;
+            renderQuestion(quizState.type, quizState.currentQuestionIndex);
+        };
+    }
+
+    function showQuizResults(quizType) {
+        const questionBox = document.getElementById(quizType === 'coding' ? 'question-box' : 'compliance-question-box');
+        const resultsBox = document.getElementById(quizType === 'coding' ? 'quiz-results' : 'compliance-results');
+        const scoreEl = document.getElementById(quizType === 'coding' ? 'quiz-score' : 'compliance-score');
+        const totalEl = document.getElementById(quizType === 'coding' ? 'quiz-total' : 'compliance-total');
+        const restartBtn = document.getElementById(quizType === 'coding' ? 'restart-quiz-btn' : 'compliance-restart-btn');
+
+        questionBox.classList.add('hidden');
+        resultsBox.classList.remove('hidden');
+        scoreEl.textContent = quizState.score;
+        totalEl.textContent = quizData[quizState.type].questions.length;
+
+        restartBtn.onclick = () => startQuiz(quizState.type);
+
+        showMessage("Quiz complete! Check your score.", 'info');
+    }
+
+    // Initialize the app by showing the default dashboard
+    document.addEventListener('DOMContentLoaded', () => {
+        showModule('dashboard', document.querySelector(`.sidebar button[onclick*="showModule('dashboard')"]`));
+        renderTasks();
+    });
+</script>
+
+</body>
+</html>
