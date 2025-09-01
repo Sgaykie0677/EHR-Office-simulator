@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EHR Medical Office Simulator</title>
+    <!-- Use Tailwind CSS for a modern, responsive design -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -34,24 +35,45 @@
             width: 100%;
             max-width: 900px;
             padding: 2rem;
+            display: flex;
+            flex-direction: row;
         }
-        .tab-btn {
-            padding: 1rem 1.5rem;
-            font-weight: 600;
+        .sidebar {
+            width: 250px;
+            border-right: 2px solid #e5e7eb;
+            padding-right: 1.5rem;
+        }
+        .sidebar-btn {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #4b5563;
             cursor: pointer;
-            transition: color 0.2s, background-color 0.2s;
-            border-bottom: 2px solid transparent;
+            transition: background-color 0.2s, color 0.2s;
         }
-        .tab-btn:hover {
-            background-color: #f3f4f6;
+        .sidebar-btn:hover {
+            background-color: #e5e7eb;
+            color: #1f2937;
         }
-        .tab-btn.active {
-            color: #3b82f6;
-            border-bottom-color: #3b82f6;
+        .sidebar-btn.active {
+            background-color: #dbeafe;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .sidebar-btn-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 0.75rem;
+        }
+        .content-area {
+            flex-grow: 1;
+            padding-left: 2rem;
         }
         .tab-content {
             display: none;
-            padding-top: 2rem;
         }
         .tab-content.active {
             display: block;
@@ -62,6 +84,7 @@
             padding: 1.5rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
+        /* Styling for the quiz section */
         .question-box {
             background-color: #f9fafb;
             border-radius: 8px;
@@ -124,167 +147,291 @@
             background-color: #9ca3af;
             cursor: not-allowed;
         }
-        #encoder-container {
-            max-width: 800px;
-            width: 100%;
-            padding: 30px;
-            background-color: #fff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #searchInput {
-            flex-grow: 1;
-            padding: 12px 18px;
-            border: 1px solid #ccc;
-            border-radius: 25px;
-            font-size: 1em;
-            outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        #searchButton {
-            background-color: #2c3e50;
-            color: #fff;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 10px;
-            background-color: #f9f9f9;
-            border: 1px solid #e0e0e0;
+        /* Claim Scrubbing Styles */
+        .claim-container {
+            border: 2px solid #e2e8f0;
             border-radius: 8px;
-            transition: background-color 0.3s;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
         }
-        .result-term {
-            font-weight: bold;
-            color: #555;
+        .claim-field {
+            margin-bottom: 1rem;
         }
-        .result-code {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #eee;
-            padding: 5px 10px;
-            border-radius: 5px;
-            color: #2c3e50;
+        .claim-field label {
+            font-weight: 600;
+            color: #4a5568;
+            display: block;
+            margin-bottom: 0.5rem;
         }
-        .no-results {
-            text-align: center;
-            color: #7f8c8d;
-            font-style: italic;
+        .claim-field input, .claim-field select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+        }
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
         }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 font-sans">
 
     <div class="app-container">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">EHR Medical Office Simulator</h1>
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h1 class="text-xl font-bold text-gray-800 mb-4">EHR Simulator</h1>
+            <nav class="flex flex-col">
+                <button class="sidebar-btn active" data-tab="dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="9"></rect>
+                        <rect x="14" y="3" width="7" height="5"></rect>
+                        <rect x="14" y="12" width="7" height="9"></rect>
+                        <rect x="3" y="16" width="7" height="5"></rect>
+                    </svg>
+                    Dashboard
+                </button>
+                <button class="sidebar-btn" data-tab="patient-chart">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Patient Chart
+                </button>
+                <button class="sidebar-btn" data-tab="scheduling">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    Scheduling
+                </button>
+                <button class="sidebar-btn" data-tab="coding">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                    Coding
+                </button>
+                <button class="sidebar-btn" data-tab="billing">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12V7H3v5c0 1.66 1.34 3 3 3h12a3 3 0 0 0 3-3z"></path>
+                        <path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2H3V5z"></path>
+                        <circle cx="9" cy="18" r="2"></circle>
+                        <circle cx="15" cy="18" r="2"></circle>
+                    </svg>
+                    Billing & Payments
+                </button>
+                <button class="sidebar-btn" data-tab="prior-auth">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5"></path>
+                        <path d="M2 12l10 5 10-5"></path>
+                    </svg>
+                    Prior Auth
+                </button>
+                <button class="sidebar-btn" data-tab="claims">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Claim Forms
+                </button>
+                <button class="sidebar-btn" data-tab="quiz">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Quiz
+                </button>
+            </nav>
+        </aside>
 
-        <!-- Tab Buttons -->
-        <div class="flex border-b-2 border-gray-200 mb-4">
-            <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
-            <button class="tab-btn" data-tab="coding">Medical Coding</button>
-            <button class="tab-btn" data-tab="quiz">Quiz</button>
-            <button class="tab-btn" data-tab="claims">Claims</button>
-        </div>
-
-        <!-- Tab Content -->
-        <div id="dashboard" class="tab-content active">
-            <h2 class="text-2xl font-bold mb-4">Welcome to the Dashboard</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="card">
-                    <h3 class="text-lg font-semibold text-gray-700">Today's Appointments</h3>
-                    <p class="text-4xl font-bold text-green-500 mt-2">2</p>
-                    <p class="text-sm text-gray-500">patients scheduled</p>
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- Dashboard Content -->
+            <div id="dashboard" class="tab-content active">
+                <h2 class="text-2xl font-bold mb-4">Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card">
+                        <h3 class="text-lg font-semibold text-gray-700">Today's Appointments</h3>
+                        <p class="text-4xl font-bold text-green-500 mt-2">2</p>
+                        <p class="text-sm text-gray-500">patients scheduled</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-lg font-semibold text-gray-700">Pending Tasks</h3>
+                        <p class="text-4xl font-bold text-blue-500 mt-2">0</p>
+                        <p class="text-sm text-gray-500">new assignments</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-lg font-semibold text-gray-700">Unscrubbed Claims</h3>
+                        <p class="text-4xl font-bold text-red-500 mt-2">0</p>
+                        <p class="text-sm text-gray-500">claims to review</p>
+                    </div>
                 </div>
-                <div class="card">
-                    <h3 class="text-lg font-semibold text-gray-700">Pending Tasks</h3>
-                    <p class="text-4xl font-bold text-blue-500 mt-2">0</p>
-                    <p class="text-sm text-gray-500">new assignments</p>
+                <p class="mt-8 text-gray-600">Use the sidebar to begin practicing different tasks in a medical office.</p>
+            </div>
+
+            <!-- Patient Chart Content -->
+            <div id="patient-chart" class="tab-content">
+                <h2 class="text-2xl font-bold mb-4">Patient Chart</h2>
+                <p class="text-gray-600">This section would simulate a patient's electronic health record. You can view demographic information, medical history, lab results, and vitals.</p>
+                <div class="mt-6 p-4 bg-gray-100 rounded-lg">
+                    <h3 class="font-semibold text-lg">Example Patient: Jane Doe</h3>
+                    <p class="text-sm text-gray-600">DOB: 01/15/1990</p>
+                    <p class="text-sm text-gray-600">Allergies: Penicillin</p>
+                    <p class="text-sm text-gray-600">Diagnosis: Essential Hypertension (I10)</p>
                 </div>
-                <div class="card">
-                    <h3 class="text-lg font-semibold text-gray-700">Unscrubbed Claims</h3>
-                    <p class="text-4xl font-bold text-red-500 mt-2">0</p>
-                    <p class="text-sm text-gray-500">claims to review</p>
+            </div>
+
+            <!-- Scheduling Content -->
+            <div id="scheduling" class="tab-content">
+                <h2 class="text-2xl font-bold mb-4">Scheduling</h2>
+                <p class="text-gray-600">This section simulates an office calendar. You can practice booking, rescheduling, and canceling appointments.</p>
+                <div class="mt-6 p-4 bg-gray-100 rounded-lg">
+                    <h3 class="font-semibold text-lg">Today's Schedule</h3>
+                    <ul class="list-disc list-inside mt-2 text-gray-700">
+                        <li>9:00 AM - John Smith (New Patient)</li>
+                        <li>9:30 AM - Jane Doe (Follow-up)</li>
+                    </ul>
                 </div>
             </div>
-            <p class="mt-8 text-gray-600">Use the tabs above to begin practicing different tasks in a medical office, like coding, billing, and taking a quiz.</p>
-        </div>
 
-        <div id="coding" class="tab-content">
-            <h2 class="text-2xl font-bold text-center mb-6">Medical Code Encoder</h2>
-            <p class="text-gray-600 text-center mb-4">Search for a diagnosis or procedure to find its corresponding code. Practice identifying the right codes for clinical scenarios.</p>
-            <div class="flex w-full gap-4">
-                <input type="text" id="searchInput" class="flex-grow p-3 border border-gray-300 rounded-lg" placeholder="Enter a diagnosis or procedure...">
-                <button id="searchButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">Search</button>
-            </div>
-            <div id="results" class="mt-6">
-                <!-- Results will be displayed here -->
-            </div>
-        </div>
-
-        <div id="quiz" class="tab-content text-center">
-            <h2 class="text-2xl font-bold mb-6">Medical Coding Quiz</h2>
-            <div id="quiz-area">
-                <div class="question-box">
-                    <p class="question-text" id="question-text"></p>
-                    <div id="answers-container"></div>
+            <!-- Coding Content -->
+            <div id="coding" class="tab-content">
+                <h2 class="text-2xl font-bold text-center mb-6">Medical Code Encoder</h2>
+                <p class="text-gray-600 text-center mb-4">Search for a diagnosis or procedure to find its corresponding code. Practice identifying the right codes for clinical scenarios.</p>
+                <div class="flex w-full gap-4">
+                    <input type="text" id="searchInput" class="flex-grow p-3 border border-gray-300 rounded-lg" placeholder="Enter a diagnosis or procedure...">
+                    <button id="searchButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">Search</button>
                 </div>
-                <div id="feedback-message" class="feedback"></div>
+                <div id="results" class="mt-6">
+                    <!-- Results will be displayed here -->
+                </div>
             </div>
 
-            <div class="navigation-btns">
-                <button id="prev-btn" disabled>Previous</button>
-                <button id="next-btn" disabled>Next</button>
+            <!-- Billing & Payments Content -->
+            <div id="billing" class="tab-content">
+                <h2 class="text-2xl font-bold mb-4">Billing & Payments</h2>
+                <p class="text-gray-600">This section allows you to practice calculating patient balances and processing payments based on insurance coverage and deductibles.</p>
+                <div class="mt-6 p-4 bg-gray-100 rounded-lg">
+                    <h3 class="font-semibold text-lg mb-2">Patient Balance Calculator</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="total-charge" class="block text-sm font-medium text-gray-700">Total Charge ($)</label>
+                            <input type="number" id="total-charge" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                        </div>
+                        <div>
+                            <label for="insurance-payment" class="block text-sm font-medium text-gray-700">Insurance Payment ($)</label>
+                            <input type="number" id="insurance-payment" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label for="copay-deductible" class="block text-sm font-medium text-gray-700">Co-pay/Deductible ($)</label>
+                        <input type="number" id="copay-deductible" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                    </div>
+                    <button id="calculate-balance-btn" class="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">
+                        Calculate Balance
+                    </button>
+                    <div class="mt-4 text-lg font-semibold">
+                        Patient Balance: <span id="patient-balance-result" class="text-red-500">$0.00</span>
+                    </div>
+                </div>
             </div>
 
-            <div id="results-area" class="mt-8 hidden">
-                <h3 class="text-xl font-bold mb-4">Quiz Complete!</h3>
-                <p class="text-lg">You scored: <span id="score-display">0</span> / <span id="total-questions">0</span></p>
-                <button class="mt-4" onclick="window.location.reload();">Retake Quiz</button>
+            <!-- Prior Auth Content -->
+            <div id="prior-auth" class="tab-content">
+                <h2 class="text-2xl font-bold mb-4">Prior Authorization</h2>
+                <p class="text-gray-600">This section simulates the process of submitting a request for prior authorization for a medical procedure or medication.</p>
+                <div class="mt-6 p-4 bg-gray-100 rounded-lg">
+                    <h3 class="font-semibold text-lg mb-2">Request Prior Auth</h3>
+                    <form id="prior-auth-form">
+                        <div class="mb-4">
+                            <label for="procedure-code" class="block text-sm font-medium text-gray-700">Procedure Code (CPT)</label>
+                            <input type="text" id="procedure-code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                        </div>
+                        <div class="mb-4">
+                            <label for="diagnosis-code" class="block text-sm font-medium text-gray-700">Diagnosis Code (ICD-10)</label>
+                            <input type="text" id="diagnosis-code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                        </div>
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Submit Request</button>
+                    </form>
+                    <div id="prior-auth-result" class="mt-4 font-semibold"></div>
+                </div>
             </div>
-        </div>
 
-        <div id="claims" class="tab-content text-center">
-            <h2 class="text-2xl font-bold mb-4">Claims Scrubbing</h2>
-            <p class="text-gray-600 mb-6">This section is for practicing how to review and "scrub" claims for errors before submitting them to an insurance company. 
+            <!-- Claim Forms Content -->
+            <div id="claims" class="tab-content">
+                <h2 class="text-2xl font-bold mb-4">Claim Forms</h2>
+                <p class="text-gray-600">This section provides an overview of the two primary claim forms: UB-04 and CMS-1500.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div class="card">
+                        <h3 class="text-lg font-semibold text-gray-700">CMS-1500</h3>
+                        <p class="text-sm text-gray-600 mt-2">Used for billing outpatient services, such as those provided in a physician's office or clinic. This form is used for professional billing.</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-lg font-semibold text-gray-700">UB-04</h3>
+                        <p class="text-sm text-gray-600 mt-2">Used for billing institutional services, such as those provided by hospitals, skilled nursing facilities, or home health agencies. This form is used for institutional billing.</p>
+                    </div>
+                </div>
+            </div>
 
-[Image of medical billing and coding]
- </p>
-            <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">
-                Load New Claim
-            </button>
-        </div>
+            <!-- Quiz Content -->
+            <div id="quiz" class="tab-content text-center">
+                <h2 class="text-2xl font-bold mb-6">Medical Coding Quiz</h2>
+                <div id="quiz-area">
+                    <div class="question-box">
+                        <p class="question-text" id="question-text"></p>
+                        <div id="answers-container"></div>
+                    </div>
+                    <div id="feedback-message" class="feedback"></div>
+                </div>
 
+                <div class="navigation-btns">
+                    <button id="prev-btn" disabled>Previous</button>
+                    <button id="next-btn" disabled>Next</button>
+                </div>
+
+                <div id="results-area" class="mt-8 hidden">
+                    <h3 class="text-xl font-bold mb-4">Quiz Complete!</h3>
+                    <p class="text-lg">You scored: <span id="score-display">0</span> / <span id="total-questions">0</span></p>
+                    <button class="mt-4" onclick="window.location.reload();">Retake Quiz</button>
+                </div>
+            </div>
+
+        </main>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- Tab Switching Logic ---
-            const tabButtons = document.querySelectorAll('.tab-btn');
+            const sidebarButtons = document.querySelectorAll('.sidebar-btn');
             const tabContents = document.querySelectorAll('.tab-content');
 
             function showTab(tabId) {
-                tabButtons.forEach(button => {
+                sidebarButtons.forEach(button => {
                     button.classList.remove('active');
                 });
                 tabContents.forEach(content => {
                     content.classList.remove('active');
                 });
 
-                document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+                document.querySelector(`.sidebar-btn[data-tab="${tabId}"]`).classList.add('active');
                 document.getElementById(tabId).classList.add('active');
             }
 
-            tabButtons.forEach(button => {
+            sidebarButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     showTab(button.getAttribute('data-tab'));
                 });
@@ -323,12 +470,12 @@
                 if (filteredCodes.length > 0) {
                     filteredCodes.forEach(item => {
                         const resultItem = document.createElement('div');
-                        resultItem.classList.add('result-item');
-                        resultItem.innerHTML = `<span class="result-term">${item.term}</span><span class="result-code">${item.code}</span>`;
+                        resultItem.classList.add('result-item', 'flex', 'justify-between', 'items-center', 'p-4', 'mb-2', 'bg-gray-50', 'rounded-lg');
+                        resultItem.innerHTML = `<span class="font-semibold text-gray-800">${item.term}</span><span class="bg-gray-200 text-gray-800 text-sm px-3 py-1 rounded-full">${item.code}</span>`;
                         resultsContainer.appendChild(resultItem);
                     });
                 } else {
-                    resultsContainer.innerHTML = `<p class="no-results">No codes found for "${query}". Try a different term.</p>`;
+                    resultsContainer.innerHTML = `<p class="text-center text-gray-500 italic mt-4">No codes found for "${query}". Try a different term.</p>`;
                 }
             }
 
@@ -340,6 +487,55 @@
                     if (event.key === 'Enter') {
                         performSearch();
                     }
+                });
+            }
+
+            // --- Billing Calculator Logic ---
+            const calculateBtn = document.getElementById('calculate-balance-btn');
+            const totalChargeInput = document.getElementById('total-charge');
+            const insurancePaymentInput = document.getElementById('insurance-payment');
+            const copayDeductibleInput = document.getElementById('copay-deductible');
+            const patientBalanceResult = document.getElementById('patient-balance-result');
+
+            function calculateBalance() {
+                const totalCharge = parseFloat(totalChargeInput.value) || 0;
+                const insurancePayment = parseFloat(insurancePaymentInput.value) || 0;
+                const copayDeductible = parseFloat(copayDeductibleInput.value) || 0;
+
+                const balance = totalCharge - insurancePayment - copayDeductible;
+                patientBalanceResult.textContent = `$${balance.toFixed(2)}`;
+            }
+
+            if (calculateBtn) {
+                calculateBtn.addEventListener('click', calculateBalance);
+            }
+
+            // --- Prior Auth Logic ---
+            const priorAuthForm = document.getElementById('prior-auth-form');
+            const priorAuthResult = document.getElementById('prior-auth-result');
+
+            if (priorAuthForm) {
+                priorAuthForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const procedureCode = document.getElementById('procedure-code').value;
+                    const diagnosisCode = document.getElementById('diagnosis-code').value;
+                    
+                    let message = '';
+                    let color = '';
+
+                    if (procedureCode.trim() === '' || diagnosisCode.trim() === '') {
+                        message = 'Please enter both a procedure and a diagnosis code.';
+                        color = '#dc2626'; // Red
+                    } else if (procedureCode.includes('992') || diagnosisCode.includes('R07')) {
+                        message = 'Authorization Approved. No further action needed.';
+                        color = '#10b981'; // Green
+                    } else {
+                        message = 'Authorization Pending. Please contact the insurance provider.';
+                        color = '#f59e0b'; // Yellow
+                    }
+
+                    priorAuthResult.textContent = message;
+                    priorAuthResult.style.color = color;
                 });
             }
 
